@@ -206,15 +206,13 @@ module.exports = TiFeedly = (function(){
      * @return {Bool} true or false
      */
     TiFeedly.prototype.login = function(){
-        return function() {
-            if(! this._validToken()){
-                return this._auth();
-            }else if(! this._validExpiration()){
-                return this._refresh();
-            }else{
-                return true;
-            }
-        };
+        if(! this._validToken()){
+            return this._auth();
+        }else if(! this._validExpiration()){
+            return this._refresh();
+        }else{
+            return true;
+        }
     }
 
     /**
