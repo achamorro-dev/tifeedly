@@ -144,7 +144,7 @@ module.exports = TiFeedly = (function(){
             oauth = false;
         }
         if(url != null){
-            var client = Ti.Network.HTTPConnection({
+            var client = Ti.Network.createHTTPClient({
                 onload: function(response){
                     if (callback != null) {
                         return callback(response);
@@ -158,7 +158,8 @@ module.exports = TiFeedly = (function(){
                     } else {
                         return response;
                     }
-                }
+                },
+                timeout: 10000
             });
             if(method != 'POST' && data != null){
                 url = url + '?';
@@ -169,7 +170,7 @@ module.exports = TiFeedly = (function(){
             }
             client.open(method,url);
             if(oauth){
-                /* FALTA AÑADIR EL HEADER CON OAUTH Y ACCESS TOKEN */
+                client.setRequestHeader('Authorization','OAuth ' + this.access_token);
             }
             if(method == 'POST'){
                 client.send(data);
