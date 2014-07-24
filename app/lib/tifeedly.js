@@ -75,6 +75,26 @@
 	     */
 	    TiFeedly.prototype._auth = function(){
 	        if(this.code == null){
+	        	var window = Ti.UI.createWindow({modal: true}),
+	        		webview = Ti.UI.createWebView(),
+	        		url = AUTH_URL + '?',
+	        		data = {
+	                    response_type: 'code',
+	                    client_id: this.client_id,
+	                    redirect_uri: 'http://localhost',
+	                    scope: 'https://cloud.feedly.com/subscriptions'
+	               	};
+	                Object.keys(data).forEach(function(key){
+	                    url = url + encodeURIComponent(key) + '='
+	                        + encodeURIComponent(data[key]) + '&';
+	                });
+	                webview.setUrl(url);
+	                webview.addEventListener('load',function(event){
+	                	alert(event.url);
+	                });
+	                window.add(webview);
+	                window.open({modal: true});
+	            /*
 	            this._request(
 	                AUTH_URL,
 	                'GET',
@@ -90,6 +110,7 @@
 	                    // this.code = EXTRAER
 	                }
 	            );
+	            */
 	        }else{
 	            return this._access();
 	        }
@@ -175,6 +196,8 @@
 	            }
 	            if(method == 'POST'){
 	                client.send(data);
+	            }else{
+	            	client.send();
 	            }
 	        }
 	    };
@@ -207,7 +230,7 @@
 	     * @return {Bool} true or false
 	     */
 	    TiFeedly.prototype.login = function(){
-	        if(! this._validToken()){
+	    	if(! this._validToken()){
 	            return this._auth();
 	        }else if(! this._validExpiration()){
 	            return this._refresh();
