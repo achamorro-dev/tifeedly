@@ -64,7 +64,7 @@ module.exports = TiFeedly = (function(){
                 );
             }
         }
-    }
+    };
 
     /**
      * Execute authentication in Feedly Cloud.
@@ -92,7 +92,7 @@ module.exports = TiFeedly = (function(){
         }else{
             return this._access();
         }
-    }
+    };
 
     /**
      * Request refresh tokens to access to Feedly Cloud
@@ -124,7 +124,7 @@ module.exports = TiFeedly = (function(){
                 return this._access();
             }
         }
-    }
+    };
 
     /**
      * Generic method to execute http request to Feedly Cloud
@@ -176,7 +176,7 @@ module.exports = TiFeedly = (function(){
                 client.send(data);
             }
         }
-    }
+    };
 
     /**
      * Return true or false if exist a valid expiration date
@@ -185,7 +185,7 @@ module.exports = TiFeedly = (function(){
      */
     TiFeedly.prototype._validExpiration = function(){
         return (this.expires != null) && (this.expires > new Date()) && ((this.expires - new Date()) < this.expiration_min);
-    }
+    };
 
     /**
      * Return true or false if exist a valid access and refresh token
@@ -194,7 +194,7 @@ module.exports = TiFeedly = (function(){
      */
     TiFeedly.prototype._validToken = function(){
         return (this.access_token != null) && (this.refresh_token != null);
-    }
+    };
 
 
 
@@ -213,23 +213,8 @@ module.exports = TiFeedly = (function(){
         }else{
             return true;
         }
-    }
-
-    /**
-     * Public method to refresh access token
-     * @method refresh
-     * @return {Bool} true or false
-     */
-    TiFeedly.prototype.refresh = function(){
-        return function() {
-            if (! this._validExpiration())
-                return this._refresh();
-            else
-                return true;
-            }
-        };
-    }
-
+    };
+    
     /**
      * Public method to logout
      * @method logout
@@ -241,6 +226,19 @@ module.exports = TiFeedly = (function(){
         this.access_token = null;
         this.refresh_token = null;
         this.expires = null;
-    }
+    };
+
+    /**
+     * Public method to refresh access token
+     * @method refresh
+     * @return {Bool} true or false
+     */
+    TiFeedly.prototype.refresh = function(){
+        if (! this._validExpiration()){
+            return this._refresh();
+        }else{
+            return true;
+        }
+    };
 
 }).call(this);
