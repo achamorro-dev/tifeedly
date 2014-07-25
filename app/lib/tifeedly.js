@@ -57,7 +57,7 @@
 	                    },
 	                    false,
 	                    function(response){
-	                        console.log(response);
+	                        console.log("Respuesta!" + response);
 	                        // this.access_token = EXTRAER
 	                        // this.refresh_token = EXTRAER
 	                        // this.expires = new Date(new Date().getTime() + (body.expires_in * 1000));
@@ -90,28 +90,26 @@
 	                });
 	                webview.setUrl(url);
 	                webview.addEventListener('load',function(event){
-	                	alert(event.url);
+	                	if(event.url.indexOf('http://localhost') == 0 ){
+	                		window.close();
+	                		delete(window);
+							var params = event.url.split('?')[1].split('&');
+							for (var i=0; i<params.length; i++) {
+								var paramSplited = params[i].split('=');
+								if(paramSplited[0] == 'code'){
+							  		TiFeedly.code=paramSplited[1];
+							  		return TiFeedly.prototype._access();
+							  	}
+							};
+	                	}else{
+	                		window.close();
+	                		delete(window);
+	                		return false;
+	                	}
 	                });
 	                window.add(webview);
 	                window.open({modal: true});
-	            /*
-	            this._request(
-	                AUTH_URL,
-	                'GET',
-	                {
-	                    response_type: 'code',
-	                    client_id: this.client_id,
-	                    redirect_uri: 'http://localhost',
-	                    scope: 'https://cloud.feedly.com/subscriptions'
-	                },
-	                false,
-	                function(response){
-	                    console.log(response);
-	                    // this.code = EXTRAER
-	                }
-	            );
-	            */
-	        }else{
+			}else{
 	            return this._access();
 	        }
 	    };
@@ -166,6 +164,7 @@
 	            oauth = false;
 	        }
 	        if(url != null){
+	        	console.log("========== Metodo request");
 	            var client = Ti.Network.createHTTPClient({
 	                onload: function(response){
 	                    if (callback != null) {
