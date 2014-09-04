@@ -2,7 +2,7 @@ var TiFeedly = require('tifeedly');
 
 
 function startFeedly(e) {
-    var feedly = new TiFeedly('sandbox','ES3R6KCEG46BW9MYD332');
+    var feedly = new TiFeedly('sandbox','YDRYI5E8OP2JKXYSDW79');
     feedly.login();
 }
 
