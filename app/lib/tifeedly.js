@@ -14,6 +14,7 @@
 	    TiFeedly = null;
 	
 	module.exports = TiFeedly = (function(){
+		var that;
 	    /**
 	     * Creates an instance of the TiFeedly class
 	     * @constructor
@@ -31,6 +32,7 @@
 	        this.refresh_token = null;
 	        this.expires = null;
 	        this.expiration_min = 3600000; // milliseconds
+	        that = this;
 	    }
 	
 	    // ====== PRIVATE METHODS ======
@@ -41,29 +43,30 @@
 	     * @return {Bool} true or false
 	     */
 	    TiFeedly.prototype._access = function(){
-	        if(this.code == null){
-	            return this._auth();
+	        if(that.code == null){
+	            return that._auth();
 	        }else{
-	            if(this.access_token == null || this.refresh_token == null){
-	                this._request(
+	            if(that.access_token == null || that.refresh_token == null){
+	                that._request(
 	                    TOKEN_URL,
 	                    'POST',
 	                    {
-	                        code: this.code,
-	                        client_id: this.client_id,
-	                        client_secret: this.client_secret,
+	                        code: that.code,
+	                        client_id: that.client_id,
+	                        client_secret: that.client_secret,
 	                        grant_type: 'authorization_code',
 	                        redirect_uri: 'http://localhost'
 	                    },
 	                    false,
 	                    function(response){
-	                        console.log("Respuesta!");
-							Object.keys(response).forEach(function(key){
-			                    console.log(key + " : " + response[key]);
-			                });
-	                        // this.access_token = EXTRAER
-	                        // this.refresh_token = EXTRAER
-	                        // this.expires = new Date(new Date().getTime() + (body.expires_in * 1000));
+	                    	if(response.error){
+								console.log("HA OCURRIDO UN ERROR");
+	                    	}else{
+	                    		var responseObject = JSON.parse(response);
+	                    		that.access_token=responseObject.access_token;
+	                    		that.refresh_token=responseObject.refresh_token;
+	                    		that.expires = new Date(new Date().getTime() + (responseObject.expires_in * 1000));
+	                    	}
 	                    }
 	                );
 	            }
@@ -77,13 +80,13 @@
 	     * @return {Bool} true or false
 	     */
 	    TiFeedly.prototype._auth = function(){
-	        if(this.code == null){
+	        if(that.code == null){
 	        	var window = Ti.UI.createWindow({modal: true}),
 	        		webview = Ti.UI.createWebView(),
 	        		url = AUTH_URL + '?',
 	        		data = {
 	                    response_type: 'code',
-	                    client_id: this.client_id,
+	                    client_id: that.client_id,
 	                    redirect_uri: 'http://localhost',
 	                    scope: 'https://cloud.feedly.com/subscriptions'
 	               	};
@@ -100,8 +103,8 @@
 							for (var i=0; i<params.length; i++) {
 								var paramSplited = params[i].split('=');
 								if(paramSplited[0] == 'code'){
-							  		TiFeedly.code=paramSplited[1];
-							  		return TiFeedly.prototype._access.call(TiFeedly);
+							  		that.code=paramSplited[1];
+							  		return that._access();
 							  	}
 							};
 	                	}else{
@@ -113,7 +116,7 @@
 	                window.add(webview);
 	                window.open({modal: true});
 			}else{
-	            return this._access();
+	            return that._access();
 	        }
 	    };
 	
@@ -123,28 +126,32 @@
 	     * @return {Bool} true or false
 	     */
 	    TiFeedly.prototype._refresh = function(){
-	        if(this.code == null){
-	            return this._auth();
+	        if(that.code == null){
+	            return that._auth();
 	        }else{
-	            if(this.refresh_token != null){
-	                this._request(
+	            if(that.refresh_token != null){
+	            	that._request(
 	                    TOKEN_URL,
 	                    'POST',
 	                    {
-	                        refresh_token: this.refresh_token,
-	                        client_id: this.client_id,
-	                        client_secret: this.client_secret,
+	                        refresh_token: that.refresh_token,
+	                        client_id: that.client_id,
+	                        client_secret: that.client_secret,
 	                        grant_type: 'refresh_token'
 	                    },
 	                    false,
 	                    function(response){
-	                        console.log(response);
-	                        // this.access_token = EXTRAER
-	                        // this.expires = new Date(new Date().getTime() + (body.expires_in * 1000));
+	                    	if(response.error){
+								console.log("HA OCURRIDO UN ERROR");
+	                    	}else{
+	                    		var responseObject = JSON.parse(response);
+	                    		that.access_token=responseObject.access_token;
+	                    		that.expires = new Date(new Date().getTime() + (responseObject.expires_in * 1000));
+	                    	}
 	                    }
 	                );
 	            }else{
-	                return this._access();
+	                return that._access();
 	            }
 	        }
 	    };
@@ -170,9 +177,9 @@
 	            var client = Ti.Network.createHTTPClient({
 	                onload: function(response){
 	                    if (callback != null) {
-	                        return callback(response);
+	                        return callback(this.responseText);
 	                    } else {
-	                        return response;
+	                        return responseText;
 	                    }
 	                },
 	                onerror: function(response){
@@ -193,15 +200,15 @@
 	            }
 	            client.open(method,url);
 	            if(oauth){
-	                client.setRequestHeader('Authorization','OAuth ' + this.access_token);
+	                client.setRequestHeader('Authorization','OAuth ' + that.access_token);
 	            }
-	            console.log("Ejecutando http request:");
-	            console.log("    URL: " + url);
-	            console.log("    METHOD: " + method);
-	            console.log("    DATA: ");
-				Object.keys(data).forEach(function(key){
-	                console.log(key + " : " + data[key]);
-	            });
+	            // console.log("Ejecutando http request:");
+	            // console.log("    URL: " + url);
+	            // console.log("    METHOD: " + method);
+	            // console.log("    DATA: ");
+				// Object.keys(data).forEach(function(key){
+	                // console.log(key + " : " + data[key]);
+	            // });
 	            if(method == 'POST'){
 	                client.send(data);
 	            }else{
@@ -216,7 +223,7 @@
 	     * @return {Bool} true or false if exist a valid expiration date
 	     */
 	    TiFeedly.prototype._validExpiration = function(){
-	        return (this.expires != null) && (this.expires > new Date()) && ((this.expires - new Date()) < this.expiration_min);
+	        return (that.expires != null) && (that.expires > new Date()) && ((that.expires - new Date()) < that.expiration_min);
 	    };
 	
 	    /**
@@ -225,7 +232,7 @@
 	     * @return {Bool} true or false if exist a valid access and refresh token
 	     */
 	    TiFeedly.prototype._validToken = function(){
-	        return (this.access_token != null) && (this.refresh_token != null);
+	        return (that.access_token != null) && (that.refresh_token != null);
 	    };
 	
 	
@@ -238,10 +245,10 @@
 	     * @return {Bool} true or false
 	     */
 	    TiFeedly.prototype.login = function(){
-	    	if(! this._validToken()){
-	            return this._auth();
-	        }else if(! this._validExpiration()){
-	            return this._refresh();
+	    	if(! that._validToken()){
+	            return that._auth();
+	        }else if(! that._validExpiration()){
+	            return that._refresh();
 	        }else{
 	            return true;
 	        }
@@ -254,10 +261,10 @@
 	     */
 	    TiFeedly.prototype.logout = function(){
 	        /* Igual que access pero distinto grant_type */
-	        this.code = null;
-	        this.access_token = null;
-	        this.refresh_token = null;
-	        this.expires = null;
+	        that.code = null;
+	        that.access_token = null;
+	        that.refresh_token = null;
+	        that.expires = null;
 	    };
 	
 	    /**
@@ -266,8 +273,8 @@
 	     * @return {Bool} true or false
 	     */
 	    TiFeedly.prototype.refresh = function(){
-	        if (! this._validExpiration()){
-	            return this._refresh();
+	        if (!that._validExpiration()){
+	            return that._refresh();
 	        }else{
 	            return true;
 	        }
