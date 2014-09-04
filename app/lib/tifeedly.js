@@ -57,7 +57,10 @@
 	                    },
 	                    false,
 	                    function(response){
-	                        console.log("Respuesta!" + response);
+	                        console.log("Respuesta!");
+							Object.keys(response).forEach(function(key){
+			                    console.log(key + " : " + response[key]);
+			                });
 	                        // this.access_token = EXTRAER
 	                        // this.refresh_token = EXTRAER
 	                        // this.expires = new Date(new Date().getTime() + (body.expires_in * 1000));
@@ -89,7 +92,7 @@
 	                        + encodeURIComponent(data[key]) + '&';
 	                });
 	                webview.setUrl(url);
-	                webview.addEventListener('load',function(event){
+	                webview.addEventListener('error',function(event){
 	                	if(event.url.indexOf('http://localhost') == 0 ){
 	                		window.close();
 	                		delete(window);
@@ -98,7 +101,7 @@
 								var paramSplited = params[i].split('=');
 								if(paramSplited[0] == 'code'){
 							  		TiFeedly.code=paramSplited[1];
-							  		return TiFeedly.prototype._access();
+							  		return TiFeedly.prototype._access.call(TiFeedly);
 							  	}
 							};
 	                	}else{
@@ -164,7 +167,6 @@
 	            oauth = false;
 	        }
 	        if(url != null){
-	        	console.log("========== Metodo request");
 	            var client = Ti.Network.createHTTPClient({
 	                onload: function(response){
 	                    if (callback != null) {
@@ -193,6 +195,13 @@
 	            if(oauth){
 	                client.setRequestHeader('Authorization','OAuth ' + this.access_token);
 	            }
+	            console.log("Ejecutando http request:");
+	            console.log("    URL: " + url);
+	            console.log("    METHOD: " + method);
+	            console.log("    DATA: ");
+				Object.keys(data).forEach(function(key){
+	                console.log(key + " : " + data[key]);
+	            });
 	            if(method == 'POST'){
 	                client.send(data);
 	            }else{
