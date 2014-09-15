@@ -1,5 +1,8 @@
 <Alloy>
 	<Window class="container">
 		<Button id="buttonFeedly" onClick="startFeedly">Feedly</Button>
+		<Button id="subscriptionsFeedly" onClick="getSubscriptions">Subscriptions</Button>
+		<Button id="categoriesFeedly" onClick="getCategories">Categories</Button>
+		<Button id="readsFeedly" onClick="reads">Reads</Button>
 	</Window>
 </Alloy>

@@ -11,6 +11,9 @@
 	var BASE_URL = 'http://sandbox.feedly.com',
 	    AUTH_URL = BASE_URL + '/v3/auth/auth',
 	    TOKEN_URL = BASE_URL + '/v3/auth/token',
+	    LATEST_READS = BASE_URL + '/v3/markers/reads',
+	    GET_SUBSCRIPTIONS = BASE_URL + '/v3/subscriptions',
+	    GET_CATEGORIES = BASE_URL + '/v3/categories',
 	    TiFeedly = null;
 	
 	module.exports = TiFeedly = (function(){
@@ -179,7 +182,7 @@
 	                    if (callback != null) {
 	                        return callback(this.responseText);
 	                    } else {
-	                        return responseText;
+	                        return this.responseText;
 	                    }
 	                },
 	                onerror: function(response){
@@ -279,6 +282,53 @@
 	            return true;
 	        }
 	    };
+	    
+	    /**
+	     * Function to get data without input
+	     */
+	    TiFeedly.prototype._get = function(url, data, cb){
+	    	if(url != null){
+	    		that._request(
+	    			url,
+	    			'GET',
+	    			data,
+	    			function(response){
+	                	if(response.error){
+							console.log("HA OCURRIDO UN ERROR");
+	                	}else{
+	                		var responseObject = JSON.parse(response);
+	                		if(cb != null){
+	                			return cb(responseObject);
+	                		}else{
+	                			return responseObject;
+	                		}
+	                	}
+	                }
+				);
+	    	}
+	    };
+	    
+	    /**
+	     * Get the latest read operations
+	     */
+	    TiFeedly.prototype.reads = function(callback){
+	    	return that._get(LATEST_READS, null, callback);
+	    };
+	    
+	    /**
+	     * Get the user's subscriptions
+	     */
+	    TiFeedly.prototype.getSubscriptions = function(callback){
+	    	that._get(GET_SUBSCRIPTIONS, null, callback);
+	    };
+	    
+	    /**
+	     * Get the user's categories
+	     */
+	    TiFeedly.prototype.getCategories = function(callback){
+	    	that._get(GET_CATEGORIES, null, callback);
+	    };
+	    
 	    
 	    return TiFeedly;
 	    
