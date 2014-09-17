@@ -1,8 +1,16 @@
 <Alloy>
 	<Window class="container">
-		<Button id="buttonFeedly" onClick="startFeedly">Feedly</Button>
-		<Button id="subscriptionsFeedly" onClick="getSubscriptions">Subscriptions</Button>
-		<Button id="categoriesFeedly" onClick="getCategories">Categories</Button>
-		<Button id="readsFeedly" onClick="reads">Reads</Button>
+		<Label>First step</Label>
+		<Button onClick="startFeedly">Login</Button>
+		<Label>Markers</Label>
+		<Button onClick="reads">Reads</Button>
+		<Button onClick="unreadCount">UnreadCount</Button>
+		<Button onClick="markEntryAsRead">MarkEntryAsRead</Button>
+		<Button onClick="keepEntryUnread">KeepEntryUnread</Button>
+		<Button onClick="markAsSaved">MarkAsSaved</Button>
+		<Button onClick="markAsUnsaved">MarkAsUnaved</Button>
+		<Label></Label>
+		<Button onClick="getSubscriptions">Subscriptions</Button>
+		<Button onClick="getCategories">Categories</Button>
 	</Window>
 </Alloy>

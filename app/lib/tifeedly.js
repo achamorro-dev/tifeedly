@@ -8,12 +8,14 @@
 	 /*
 	 * Constants
 	 */
-	var BASE_URL = 'http://sandbox.feedly.com',
-	    AUTH_URL = BASE_URL + '/v3/auth/auth',
-	    TOKEN_URL = BASE_URL + '/v3/auth/token',
-	    LATEST_READS = BASE_URL + '/v3/markers/reads',
-	    GET_SUBSCRIPTIONS = BASE_URL + '/v3/subscriptions',
-	    GET_CATEGORIES = BASE_URL + '/v3/categories',
+	var BASE_URL = 'http://sandbox.feedly.com/v3',
+	    AUTH_URL = BASE_URL + '/auth/auth',
+	    TOKEN_URL = BASE_URL + '/auth/token',
+	    MARKERS = BASE_URL + '/markers',
+	    LATEST_READS = BASE_URL + '/markers/reads',
+	    GET_UNREAD_COUNTS = BASE_URL + '/markers/counts',
+	    GET_SUBSCRIPTIONS = BASE_URL + '/subscriptions',
+	    GET_CATEGORIES = BASE_URL + '/categories',
 	    TiFeedly = null;
 	
 	module.exports = TiFeedly = (function(){
@@ -284,17 +286,20 @@
 	    };
 	    
 	    /**
-	     * Function to get data without input
+	     * Function to do requests to feedly
 	     */
-	    TiFeedly.prototype._get = function(url, data, cb){
+	    TiFeedly.prototype._doRequest = function(url, method, data, cb){
+	    	if(data != null)
+	    		data = JSON.stringify(data);
 	    	if(url != null){
 	    		that._request(
 	    			url,
-	    			'GET',
+	    			method,
 	    			data,
+	    			true,
 	    			function(response){
 	                	if(response.error){
-							console.log("HA OCURRIDO UN ERROR");
+							console.error("ERROR: " + response.error);
 	                	}else{
 	                		var responseObject = JSON.parse(response);
 	                		if(cb != null){
@@ -309,24 +314,165 @@
 	    };
 	    
 	    /**
-	     * Get the latest read operations
+	     * Get the latest read operations (to sync local cache)
 	     */
 	    TiFeedly.prototype.reads = function(callback){
-	    	return that._get(LATEST_READS, null, callback);
+	    	return that._doRequest(LATEST_READS, 'GET', null, callback);
 	    };
 	    
 	    /**
 	     * Get the user's subscriptions
 	     */
 	    TiFeedly.prototype.getSubscriptions = function(callback){
-	    	that._get(GET_SUBSCRIPTIONS, null, callback);
+	    	return that._doRequest(GET_SUBSCRIPTIONS, 'GET', null, callback);
 	    };
 	    
 	    /**
 	     * Get the user's categories
 	     */
 	    TiFeedly.prototype.getCategories = function(callback){
-	    	that._get(GET_CATEGORIES, null, callback);
+	    	return that._doRequest(GET_CATEGORIES, 'GET', null, callback);
+	    };
+	    
+	    /**
+	     * Get the list of unread counts
+	     */
+	    TiFeedly.prototype.getUnreadCounts = function(callback){
+	    	return that._doRequest(GET_UNREAD_COUNTS, 'GET', null, callback);
+	    };
+	    
+	    /**
+	     * Mark one or multiple articles as read
+	     */
+	    TiFeedly.prototype.markEntryAsRead = function(entries,callback){
+	    	// Check entries as array
+	    	if(Array.isArray(entries)){
+	    		// Generate data
+		    	var data = {
+		    		action: "markAsRead",
+		    		type: "entries",
+		    		entryIds: entries
+		    	};
+		    	return that._doRequest(MARKERS, 'POST', data, callback);
+	    	}else{
+	    		return callback(JSON.stringify({error: 'Entries parameter is not array'}));
+	    	}
+	    };
+	    
+	    /**
+	     * Keep one or multiple articles as unread
+	     */
+	    TiFeedly.prototype.keepEntryUnread = function(entries,callback){
+	    	// Check entries as array
+	    	if(Array.isArray(entries)){
+	    		// Generate data
+		    	var data = {
+		    		action: "keepUnread",
+		    		type: "entries",
+		    		entryIds: entries
+		    	};
+		    	return that._doRequest(MARKERS, 'POST', data, callback);
+	    	}else{
+	    		return callback(JSON.stringify({error: 'Entries parameter is not array'}));
+	    	}
+	    };
+	    
+	    /**
+	     * Mark one feed as read
+	     * 
+	     * STATUS PENDING
+	     */
+	    TiFeedly.prototype.markFeedAsRead = function(feeds,callback){
+	    	// Check entries as array
+	    	if(Array.isArray(feeds)){
+	    		// Generate data
+		    	var data = {
+		    		action: "markAsRead",
+		    		type: "feeds",
+		    		feedIds: feeds
+		    	};
+		    	return that._doRequest(MARKERS, 'POST', data, callback);
+	    	}else{
+	    		return callback(JSON.stringify({error: 'Feeds parameter is not array'}));
+	    	}
+	    };
+	    
+	    /**
+	     * Mark a category as read
+	     * 
+	     * STATUS PENDING
+	     */
+	    TiFeedly.prototype.markCategoryAsRead = function(categories,callback){
+	    	// Check entries as array
+	    	if(Array.isArray(feeds)){
+	    		// Generate data
+		    	var data = {
+		    		action: "markAsRead",
+		    		type: "categories",
+		    		categoryIds: categories
+		    	};
+		    	return that._doRequest(MARKERS, 'POST', data, callback);
+	    	}else{
+	    		return callback(JSON.stringify({error: 'Categories parameter is not array'}));
+	    	}
+	    };
+	    
+	    /** 
+	     * Undo mark as read
+	     * 
+	     * STATUS PENDING
+	     */
+	    TiFeedly.prototype.undoMarkAsRead = function(categories,callback){
+	    	// Check entries as array
+	    	if(Array.isArray(categories)){
+	    		// Generate data
+		    	var data = {
+		    		action: "undoMarkAsRead",
+		    		type: "categories",
+		    		categoryIds: categories
+		    	};
+		    	return that._doRequest(MARKERS, 'POST', data, callback);
+	    	}else{
+	    		return callback(JSON.stringify({error: 'Categories parameter is not array'}));
+	    	}
+	    };
+	    
+	    /**
+	     * Mark one or multiple articles as saved
+	     * 
+	     */
+	    TiFeedly.prototype.markAsSaved = function(entries,callback){
+	    	// Check entries as array
+	    	if(Array.isArray(entries)){
+	    		// Generate data
+		    	var data = {
+		    		action: "markAsSaved",
+		    		type: "entries",
+		    		entryIds: entries
+		    	};
+		    	return that._doRequest(MARKERS, 'POST', data, callback);
+	    	}else{
+	    		return callback(JSON.stringify({error: 'Entries parameter is not array'}));
+	    	}
+	    };
+	    
+	    /**
+	     * Mark one or multiple articles as unsaved
+	     * 
+	     */
+	    TiFeedly.prototype.markAsUnsaved = function(entries,callback){
+	    	// Check entries as array
+	    	if(Array.isArray(entries)){
+	    		// Generate data
+		    	var data = {
+		    		action: "markAsUnsaved",
+		    		type: "entries",
+		    		entryIds: entries
+		    	};
+		    	return that._doRequest(MARKERS, 'POST', data, callback);
+	    	}else{
+	    		return callback(JSON.stringify({error: 'Entries parameter is not array'}));
+	    	}
 	    };
 	    
 	    

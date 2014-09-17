@@ -1,4 +1,11 @@
 ".container": {
 	backgroundColor:"white",
 	layout:"vertical"
+},
+"Label": {
+	color:"black",
+	left:"15",
+},
+"Button": {
+	left:"15"
 }
