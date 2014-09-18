@@ -14,6 +14,7 @@
 	    MARKERS = BASE_URL + '/markers',
 	    LATEST_READS = BASE_URL + '/markers/reads',
 	    GET_UNREAD_COUNTS = BASE_URL + '/markers/counts',
+	    STREAMS = BASE_URL + '/streams/',
 	    GET_SUBSCRIPTIONS = BASE_URL + '/subscriptions',
 	    GET_CATEGORIES = BASE_URL + '/categories',
 	    TiFeedly = null;
@@ -26,9 +27,12 @@
 	     * @param {String} client_id String with client_id in Feedly Cloud
 	     * @param {String} client_secret String with client_secret in Feedly Cloud
 	     */
-	    function TiFeedly(client_id, client_secret){
+	    function TiFeedly(client_id, client_secret, maxCountStream){
 	        if(client_id == null || client_secret == null){
 	            return null;
+	        }
+	        if(maxCountStream == null){
+	        	maxCountStream = 150;
 	        }
 	        this.client_id = client_id;
 	        this.client_secret = client_secret;
@@ -37,6 +41,7 @@
 	        this.refresh_token = null;
 	        this.expires = null;
 	        this.expiration_min = 3600000; // milliseconds
+	        this.maxCountStream = maxCountStream;
 	        that = this;
 	    }
 	
@@ -69,6 +74,7 @@
 	                    	}else{
 	                    		var responseObject = JSON.parse(response);
 	                    		that.access_token=responseObject.access_token;
+	                    		console.log("ACCESS_TOKEN: " + that.access_token);
 	                    		that.refresh_token=responseObject.refresh_token;
 	                    		that.expires = new Date(new Date().getTime() + (responseObject.expires_in * 1000));
 	                    	}
@@ -207,9 +213,9 @@
 	            if(oauth){
 	                client.setRequestHeader('Authorization','OAuth ' + that.access_token);
 	            }
-	            // console.log("Ejecutando http request:");
-	            // console.log("    URL: " + url);
-	            // console.log("    METHOD: " + method);
+	            console.log("Ejecutando http request:");
+	            console.log("    URL: " + url);
+				console.log("    METHOD: " + method);
 	            // console.log("    DATA: ");
 				// Object.keys(data).forEach(function(key){
 	                // console.log(key + " : " + data[key]);
@@ -289,7 +295,7 @@
 	     * Function to do requests to feedly
 	     */
 	    TiFeedly.prototype._doRequest = function(url, method, data, cb){
-	    	if(data != null)
+	    	if(data != null && method != 'GET')
 	    		data = JSON.stringify(data);
 	    	if(url != null){
 	    		that._request(
@@ -475,6 +481,51 @@
 	    	}
 	    };
 	    
+	    /**
+	     * Get a list of entry ids for a specific stream
+	     */
+	    TiFeedly.prototype.getStreams = function(id,unreadOnly,continuation,callback){
+	    	if(id != null){
+		    	if(unreadOnly == null){
+		    		unreadOnly = true;
+		    	}
+		    	var data = {
+		    		streamId: id,
+		    		count: that.maxCountStream,
+		    		unreadOnly: unreadOnly,
+		    		ranked: 'oldest'
+		    	};
+		    	if(continuation != null){
+		    		data.continuation = continuation;	
+		    	}
+		    	return that._doRequest(STREAMS + 'ids/', 'GET', data, callback);
+		    }else{
+		    	return callback(JSON.stringify({error: 'Id parameter is required'}));
+		    }
+	    };
+	    
+	    /**
+	     * Get the content of a stream
+	     */
+	    TiFeedly.prototype.getStreamsContent = function(id,unreadOnly,continuation,callback){
+	    	if(id != null){
+		    	if(unreadOnly == null){
+		    		unreadOnly = true;
+		    	}
+		    	var data = {
+		    		streamId: id,
+		    		count: that.maxCountStream,
+		    		unreadOnly: unreadOnly,
+		    		ranked: 'oldest'
+		    	};
+		    	if(continuation != null){
+		    		data.continuation = continuation;	
+		    	}
+		    	return that._doRequest(STREAMS + 'contents/', 'GET', data, callback);
+		    }else{
+		    	return callback(JSON.stringify({error: 'Id parameter is required'}));
+		    }
+	    };
 	    
 	    return TiFeedly;
 	    

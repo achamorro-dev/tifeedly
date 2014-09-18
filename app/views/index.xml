@@ -1,16 +1,22 @@
 <Alloy>
 	<Window class="container">
-		<Label>First step</Label>
-		<Button onClick="startFeedly">Login</Button>
-		<Label>Markers</Label>
-		<Button onClick="reads">Reads</Button>
-		<Button onClick="unreadCount">UnreadCount</Button>
-		<Button onClick="markEntryAsRead">MarkEntryAsRead</Button>
-		<Button onClick="keepEntryUnread">KeepEntryUnread</Button>
-		<Button onClick="markAsSaved">MarkAsSaved</Button>
-		<Button onClick="markAsUnsaved">MarkAsUnaved</Button>
-		<Label></Label>
-		<Button onClick="getSubscriptions">Subscriptions</Button>
-		<Button onClick="getCategories">Categories</Button>
+		<ScrollView>
+			<Label>First step</Label>
+			<Button onClick="startFeedly">Login</Button>
+			<Label>Markers</Label>
+			<Button onClick="reads">Reads</Button>
+			<Button onClick="unreadCount">UnreadCount</Button>
+			<Button onClick="markEntryAsRead">MarkEntryAsRead</Button>
+			<Button onClick="keepEntryUnread">KeepEntryUnread</Button>
+			<Button onClick="markAsSaved">MarkAsSaved</Button>
+			<Button onClick="markAsUnsaved">MarkAsUnaved</Button>
+			<Label>Subscriptions</Label>
+			<Button onClick="getSubscriptions">Subscriptions</Button>
+			<Label>Categories</Label>
+			<Button onClick="getCategories">Categories</Button>
+			<Label>Streams</Label>
+			<Button onClick="getStreams">GetStream</Button>
+			<Button onClick="getStreamsContent">GetStreamsContent</Button>
+		</ScrollView>
 	</Window>
 </Alloy>

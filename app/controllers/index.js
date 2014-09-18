@@ -57,5 +57,18 @@ function markAsUnsaved(e){
 	});
 }
 
+function getStreams(e){
+	var id = 'feed/http://www.elandroidelibre.com/feed/';
+	feedly.getStreams(id,true,null,function(r){
+		console.log(r);
+	});
+}
+
+function getStreamsContent(e){
+	var id = 'feed/http://www.elandroidelibre.com/feed/';
+	feedly.getStreamsContent(id,true,null,function(r){
+		console.log(r);
+	});
+}
 
 $.index.open();

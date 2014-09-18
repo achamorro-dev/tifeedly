@@ -1,6 +1,8 @@
 ".container": {
-	backgroundColor:"white",
-	layout:"vertical"
+	backgroundColor:"white"
+},
+"ScrollView": {
+	layout: "vertical",
 },
 "Label": {
 	color:"black",
