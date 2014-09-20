@@ -44,9 +44,107 @@
 	        this.expiration_min = 3600000; // milliseconds
 	        this.maxCountStream = maxCountStream;
 	        that = this;
+	        return this._loadDatabase();
 	    }
 	
 	    // ====== PRIVATE METHODS ======
+	    
+	    /**
+	     * Method to open and create database
+	     */
+	    TiFeedly.prototype._loadDatabase = function(){
+	    	that.db = Ti.Database.open('tifeedly');
+			that.db.execute('CREATE TABLE IF NOT EXISTS "auth" ( \
+				"client_id" varchar(100),\
+				"client_secret" varchar(100),\
+				"access_token" varchar(300),\
+				"refresh_token" varchar(300),\
+				"expires" varchar(10)\
+			)');
+			that.db.execute('CREATE TABLE IF NOT EXISTS "profile" (\
+				"id" varchar(100),\
+				"email" varchar(100),\
+				"givenName" varchar(60),\
+				"familyName" varchar(60),\
+				"fullName" varchar(120),\
+				"picture" varhcar(250),\
+				"gender" varchar(6),\
+				"locale" varhcar(10),\
+				"google" varchar(60),\
+				"reader" varchar(60),\
+				"twitter" varchar(30),\
+				"twitterUserId" varchar(60),\
+				"facebookUserId" varchar(60),\
+				"wordPressId" varchar(60),\
+				"windowsLiveId" varchar(60),\
+				"wave" varchar(10),\
+				"client" varchar(60)\
+			)');
+	    };
+	    
+	    /**
+	     * Save auth data in database
+	     */
+	    TiFeedly.prototype._saveAuth = function(){
+    		that.db.execute('DELETE FROM auth');
+    		that.db.execute(
+    			'INSERT INTO auth VALUES(' +
+    			'"' + that.client_id + '",' +
+    			'"' + that.client_secret + '",' +
+    			'"' + that.access_token + '",' +
+    			'"' + that.refresh_token + '",' +
+    			'"' + that.expires + '"' +
+    			')'
+    		);
+    		return true;
+	    };
+	    
+	    /**
+	     * Get auth data from database
+	     */
+		TiFeedly.prototype._getAuth = function(callback){
+	    	var authData = that.db.execute('SELECT * FROM auth');
+	    	while(authData.isValidRow()){
+	    		that.access_token = authData.getFieldByName('access_token');
+	    		that.refresh_token = authData.getFieldByName('refresh_token');
+	    		that.expire = authData.getFieldByName('expire');
+	    		authData.next();
+	    	}
+	    	return callback();
+	    };
+	    
+	    /**
+	     * Save profile data in database
+	     */
+	    TiFeedly.prototype._saveProfile = function(profile){
+	    	that.db.execute('DELETE FROM profile');
+	    	that.db.execute('INSERT INTO profile VALUES(' +
+				'"' + profile.id + '",' +
+				'"' + profile.email + '",' +
+				'"' + profile.givenName + '",' +
+				'"' + profile.familyName + '",' +
+				'"' + profile.fullName + '",' +
+				'"' + profile.picture + '",' +
+				'"' + profile.gender + '",' +
+				'"' + profile.locale + '",' +
+				'"' + profile.google + '",' +
+				'"' + profile.reader + '",' +
+				'"' + profile.twitter + '",' +
+				'"' + profile.twitterUserId + '",' +
+				'"' + profile.facebookUserId + '",' +
+				'"' + profile.wordPressId + '",' +
+				'"' + profile.windowsLiveId + '",' +
+				'"' + profile.wave + '",' +
+				'"' + profile.client + '"' +
+	    	')');
+	    };
+	    
+	    /**
+	     * Get profile data from database
+	     */
+		TiFeedly.prototype._getProfile = function(callback){
+	    	
+	    };
 	
 	    /**
 	     * Request token to access to Feedly Cloud
@@ -75,9 +173,9 @@
 	                    	}else{
 	                    		var responseObject = JSON.parse(response);
 	                    		that.access_token=responseObject.access_token;
-	                    		console.log("ACCESS_TOKEN: " + that.access_token);
 	                    		that.refresh_token=responseObject.refresh_token;
 	                    		that.expires = new Date(new Date().getTime() + (responseObject.expires_in * 1000));
+	                    		return that._saveAuth();
 	                    	}
 	                    }
 	                );
@@ -159,6 +257,7 @@
 	                    		var responseObject = JSON.parse(response);
 	                    		that.access_token=responseObject.access_token;
 	                    		that.expires = new Date(new Date().getTime() + (responseObject.expires_in * 1000));
+	                    		that._saveAuth();
 	                    	}
 	                    }
 	                );
@@ -257,13 +356,15 @@
 	     * @return {Bool} true or false
 	     */
 	    TiFeedly.prototype.login = function(){
-	    	if(! that._validToken()){
-	            return that._auth();
-	        }else if(! that._validExpiration()){
-	            return that._refresh();
-	        }else{
-	            return true;
-	        }
+	    	that._getAuth(function(){
+	    		if(! that._validToken()){
+		            return that._auth();
+		        }else if(! that._validExpiration()){
+		            return that._refresh();
+		        }else{
+		            return true;
+		        }
+	    	});
 	    };
 	    
 	    /**
