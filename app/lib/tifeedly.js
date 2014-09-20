@@ -17,6 +17,7 @@
 	    STREAMS = BASE_URL + '/streams/',
 	    GET_SUBSCRIPTIONS = BASE_URL + '/subscriptions',
 	    GET_CATEGORIES = BASE_URL + '/categories',
+	    PROFILE = BASE_URL + '/profile',
 	    TiFeedly = null;
 	
 	module.exports = TiFeedly = (function(){
@@ -525,6 +526,20 @@
 		    }else{
 		    	return callback(JSON.stringify({error: 'Id parameter is required'}));
 		    }
+	    };
+	    
+	    /**
+	     * Get the profile of the user
+	     */
+	    TiFeedly.prototype.getProfile = function(callback){
+			return that._doRequest(PROFILE, 'GET', null, callback);
+	    };
+	    
+	    /**
+	     * Update the profile of the user
+	     */
+	    TiFeedly.prototype.setProfile = function(profile,callback){
+			return that._doRequest(PROFILE, 'POST', profile, callback);
 	    };
 	    
 	    return TiFeedly;

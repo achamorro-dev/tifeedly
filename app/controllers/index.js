@@ -71,4 +71,10 @@ function getStreamsContent(e){
 	});
 }
 
+function getProfile(e){
+	feedly.getProfile(function(r){
+		console.log(r);
+	});
+}
+
 $.index.open();

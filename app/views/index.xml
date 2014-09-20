@@ -17,6 +17,8 @@
 			<Label>Streams</Label>
 			<Button onClick="getStreams">GetStream</Button>
 			<Button onClick="getStreamsContent">GetStreamsContent</Button>
+			<Label>Profile</Label>
+			<Button onClick="getProfile">GetProfile</Button>
 		</ScrollView>
 	</Window>
 </Alloy>
