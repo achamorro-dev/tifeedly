@@ -670,12 +670,11 @@
 	    	that._getProfile(function(){
 	    		if(!that.profile.id)
 	    			return that._doRequest(PROFILE, 'GET', null, function(response){
-	    				var responseObject = JSON.parse(response);
-	    				//PENDING
-	    				return callback();
+	    				that._saveProfile(response);
+	    				return callback(response);
 	    			});
 	    		else
-	    			return JSON.stringify(that.profile);
+	    			return callback(that.profile);
 	    	});
 			
 	    };
@@ -684,7 +683,10 @@
 	     * Update the profile of the user
 	     */
 	    TiFeedly.prototype.setProfile = function(profile,callback){
-			return that._doRequest(PROFILE, 'POST', profile, callback);
+			return that._doRequest(PROFILE, 'POST', profile, function(response){
+				that._saveProfile(response);
+				return callback(response);
+			});
 	    };
 	    
 	    return TiFeedly;
