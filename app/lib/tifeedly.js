@@ -53,15 +53,16 @@
 	     * Method to open and create database
 	     */
 	    TiFeedly.prototype._loadDatabase = function(){
-	    	that.db = Ti.Database.open('tifeedly');
-			that.db.execute('CREATE TABLE IF NOT EXISTS "auth" ( \
+	    	var db = Ti.Database.open('tifeedly');
+			db.execute('CREATE TABLE IF NOT EXISTS "auth" ( \
 				"client_id" varchar(100),\
 				"client_secret" varchar(100),\
+				"code" varchar(100), \
 				"access_token" varchar(300),\
 				"refresh_token" varchar(300),\
 				"expires" varchar(10)\
 			)');
-			that.db.execute('CREATE TABLE IF NOT EXISTS "profile" (\
+			db.execute('CREATE TABLE IF NOT EXISTS "profile" (\
 				"id" varchar(100),\
 				"email" varchar(100),\
 				"givenName" varchar(60),\
@@ -80,22 +81,26 @@
 				"wave" varchar(10),\
 				"client" varchar(60)\
 			)');
+			db.close();
 	    };
 	    
 	    /**
 	     * Save auth data in database
 	     */
 	    TiFeedly.prototype._saveAuth = function(){
-    		that.db.execute('DELETE FROM auth');
-    		that.db.execute(
+    		var db = Ti.Database.open('tifeedly'); 
+    		db.execute('DELETE FROM auth');
+    		db.execute(
     			'INSERT INTO auth VALUES(' +
     			'"' + that.client_id + '",' +
     			'"' + that.client_secret + '",' +
+    			'"' + that.code + '",' +
     			'"' + that.access_token + '",' +
     			'"' + that.refresh_token + '",' +
     			'"' + that.expires + '"' +
     			')'
     		);
+    		db.close();
     		return true;
 	    };
 	    
@@ -103,13 +108,16 @@
 	     * Get auth data from database
 	     */
 		TiFeedly.prototype._getAuth = function(callback){
-	    	var authData = that.db.execute('SELECT * FROM auth');
+			var db = Ti.Database.open('tifeedly');
+	    	var authData = db.execute('SELECT * FROM auth');
 	    	while(authData.isValidRow()){
+	    		that.code = authData.getFieldByName('code');
 	    		that.access_token = authData.getFieldByName('access_token');
 	    		that.refresh_token = authData.getFieldByName('refresh_token');
-	    		that.expire = authData.getFieldByName('expire');
+	    		that.expires = authData.getFieldByName('expires');
 	    		authData.next();
 	    	}
+	    	db.close();
 	    	return callback();
 	    };
 	    
@@ -117,8 +125,9 @@
 	     * Save profile data in database
 	     */
 	    TiFeedly.prototype._saveProfile = function(profile){
-	    	that.db.execute('DELETE FROM profile');
-	    	that.db.execute('INSERT INTO profile VALUES(' +
+	    	var db = Ti.Database.open('tifeedly');
+	    	db.execute('DELETE FROM profile');
+	    	db.execute('INSERT INTO profile VALUES(' +
 				'"' + profile.id + '",' +
 				'"' + profile.email + '",' +
 				'"' + profile.givenName + '",' +
@@ -137,13 +146,38 @@
 				'"' + profile.wave + '",' +
 				'"' + profile.client + '"' +
 	    	')');
+	    	db.close();
 	    };
 	    
 	    /**
 	     * Get profile data from database
 	     */
 		TiFeedly.prototype._getProfile = function(callback){
-	    	
+	    	var db = Ti.Database.open('tifeedly'),
+	    		profileData = db.execute('SELECT * FROM profile');
+	    	that.profile = {};
+	    	while(profileData.isValidRow()){
+	    		that.profile.id = profileData.getFieldByName('id');
+				that.profile.email = profileData.getFieldByName('email');
+				that.profile.givenName = profileData.getFieldByName('givenName');
+				that.profile.familyName = profileData.getFieldByName('familyName');
+				that.profile.fullName = profileData.getFieldByName('fullName');
+				that.profile.picture = profileData.getFieldByName('picture');
+				that.profile.gender = profileData.getFieldByName('gender');
+				that.profile.locale = profileData.getFieldByName('locale');
+				that.profile.google = profileData.getFieldByName('google');
+				that.profile.reader = profileData.getFieldByName('reader');
+				that.profile.twitter = profileData.getFieldByName('twitter');
+				that.profile.twitterUserId = profileData.getFieldByName('twitterUserId');
+				that.profile.facebookUserId = profileData.getFieldByName('facebookUserId');
+				that.profile.wordPressId = profileData.getFieldByName('wordPressId');
+				that.profile.windowsLiveId = profileData.getFieldByName('windowsLiveId');
+				that.profile.wave = profileData.getFieldByName('wave');
+				that.profile.client = profileData.getFieldByName('client');
+	    		profileData.next();
+	    	}
+	    	db.close();
+	    	return callback();
 	    };
 	
 	    /**
@@ -334,7 +368,7 @@
 	     * @return {Bool} true or false if exist a valid expiration date
 	     */
 	    TiFeedly.prototype._validExpiration = function(){
-	        return (that.expires != null) && (that.expires > new Date()) && ((that.expires - new Date()) < that.expiration_min);
+	        return (that.expires != null) && (new Date(that.expires) > new Date()) && ((new Date(that.expires) - new Date()) > that.expiration_min);
 	    };
 	
 	    /**
@@ -633,7 +667,17 @@
 	     * Get the profile of the user
 	     */
 	    TiFeedly.prototype.getProfile = function(callback){
-			return that._doRequest(PROFILE, 'GET', null, callback);
+	    	that._getProfile(function(){
+	    		if(!that.profile.id)
+	    			return that._doRequest(PROFILE, 'GET', null, function(response){
+	    				var responseObject = JSON.parse(response);
+	    				//PENDING
+	    				return callback();
+	    			});
+	    		else
+	    			return JSON.stringify(that.profile);
+	    	});
+			
 	    };
 	    
 	    /**
