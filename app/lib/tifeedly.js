@@ -440,8 +440,12 @@
 	    			data,
 	    			true,
 	    			function(response){
-	                	if(response.error){
-							console.error("ERROR: " + response.error);
+	                	if(response.error != null){
+							if(cb != null){
+	                			return cb(response);
+	                		}else{
+	                			return response;
+	                		}
 	                	}else{
 	                		var responseObject = JSON.parse(response);
 	                		if(cb != null){
@@ -497,7 +501,7 @@
 		    	};
 		    	return that._doRequest(MARKERS, 'POST', data, callback);
 	    	}else{
-	    		return callback(JSON.stringify({error: 'Entries parameter is not array'}));
+	    		return callback({error: 'Entries parameter is not array'});
 	    	}
 	    };
 	    
@@ -515,7 +519,7 @@
 		    	};
 		    	return that._doRequest(MARKERS, 'POST', data, callback);
 	    	}else{
-	    		return callback(JSON.stringify({error: 'Entries parameter is not array'}));
+	    		return callback({error: 'Entries parameter is not array'});
 	    	}
 	    };
 	    
@@ -535,7 +539,7 @@
 		    	};
 		    	return that._doRequest(MARKERS, 'POST', data, callback);
 	    	}else{
-	    		return callback(JSON.stringify({error: 'Feeds parameter is not array'}));
+	    		return callback({error: 'Feeds parameter is not array'});
 	    	}
 	    };
 	    
@@ -555,7 +559,7 @@
 		    	};
 		    	return that._doRequest(MARKERS, 'POST', data, callback);
 	    	}else{
-	    		return callback(JSON.stringify({error: 'Categories parameter is not array'}));
+	    		return callback({error: 'Categories parameter is not array'});
 	    	}
 	    };
 	    
@@ -575,7 +579,7 @@
 		    	};
 		    	return that._doRequest(MARKERS, 'POST', data, callback);
 	    	}else{
-	    		return callback(JSON.stringify({error: 'Categories parameter is not array'}));
+	    		return callback({error: 'Categories parameter is not array'});
 	    	}
 	    };
 	    
@@ -594,7 +598,7 @@
 		    	};
 		    	return that._doRequest(MARKERS, 'POST', data, callback);
 	    	}else{
-	    		return callback(JSON.stringify({error: 'Entries parameter is not array'}));
+	    		return callback({error: 'Entries parameter is not array'});
 	    	}
 	    };
 	    
@@ -613,7 +617,7 @@
 		    	};
 		    	return that._doRequest(MARKERS, 'POST', data, callback);
 	    	}else{
-	    		return callback(JSON.stringify({error: 'Entries parameter is not array'}));
+	    		return callback({error: 'Entries parameter is not array'});
 	    	}
 	    };
 	    
@@ -636,7 +640,7 @@
 		    	}
 		    	return that._doRequest(STREAMS + 'ids/', 'GET', data, callback);
 		    }else{
-		    	return callback(JSON.stringify({error: 'Id parameter is required'}));
+		    	return callback({error: 'Id parameter is required'});
 		    }
 	    };
 	    
@@ -659,7 +663,7 @@
 		    	}
 		    	return that._doRequest(STREAMS + 'contents/', 'GET', data, callback);
 		    }else{
-		    	return callback(JSON.stringify({error: 'Id parameter is required'}));
+		    	return callback({error: 'Id parameter is required'});
 		    }
 	    };
 	    
