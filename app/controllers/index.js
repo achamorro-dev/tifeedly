@@ -1,5 +1,5 @@
 var TiFeedly = require('tifeedly');
-var feedly = new TiFeedly('sandbox','YDRYI5E8OP2JKXYSDW79');
+var feedly = new TiFeedly('sandbox','A0SXFX54S3K0OC9GNCXG');
 
 function startFeedly(e) {
     feedly.login();
